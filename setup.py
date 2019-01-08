@@ -25,7 +25,7 @@ class install(distutils_install.install):
 
 setup(
     name = "containerinfo-rpm",
-    version = '0.1.0',
+    version = '0.1.1',
     author = "David Cassany",
     author_email = "dcassany@suse.com",
     description = "OBS KIWI post run hook to package container metadata",
