@@ -1,0 +1,10 @@
+graft containerinfoRPM 
+
+global-exclude *.py[co] __pycache__
+exclude .gitignore
+exclude .travis.yml
+include README.md
+include LICENSE
+include containerinfo-rpm.spec
+prune .cache
+prune .git

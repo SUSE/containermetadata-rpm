@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+     OBS-AddTag: namespace:mytag-<VERSION>
+     OBS-AddTag: alternate/namespace:myothertag-<VERSION>-<RELEASE>
+-->
+
+<image schemaversion="6.5" name="caasp-caasp-dex">
+  <description type="system">
+    <author>SUSE Containers Team</author>
+    <contact>containers@suse.com</contact>
+    <specification>Test dummy kiwi description file</specification>
+  </description>
+  <preferences>
+    <type
+      image="docker"
+      derived_from="obsrepositories:/base#latest"/>
+    <version>1.2.3</version>
+    <packagemanager>zypper</packagemanager>
+  </preferences>
+  <repository>
+    <source path="obsrepositories:/"/>
+  </repository>
+  <packages type="image">
+    <package name="vim"/>
+  </packages> 
+</image>
+
