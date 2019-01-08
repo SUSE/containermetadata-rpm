@@ -15,6 +15,16 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
+%{!?__python2: %global __python2 /usr/bin/python2}
+%{!?__python3: %global __python3 /usr/bin/python3}
+
+%if %{undefined python2_sitelib}
+%global python2_sitelib %(%{__python2} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+%endif
+
+%if %{undefined python3_sitelib}
+%global python3_sitelib %(%{__python3} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+%endif
 
 Name:           containerinfo-rpm
 Version:        __VERSION__
@@ -26,15 +36,16 @@ Group:          Development/Tools/Building
 Source0:        %{name}-%{version}.tar.gz
 %if 0%{?suse_version} > 1315
 BuildRequires:  python3-setuptools
-Requires:       python3-setuptools
-Requires:       python3-jina2
+Requires:       python3-jinja2
+Requires:       python3-lxml
+Requires:       python3-kiwi
 %else
 BuildRequires:  python-setuptools
-Requires:       python-setuptools
 Requires:       python-jinja2
+Requires:       python-lxml
+Requires:       python-kiwi
 %endif
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-BuildArch:      noarch
 
 %description
 NEED TO REPLACE THIS
@@ -72,8 +83,10 @@ python2 setup.py install --root %{buildroot} \
 %{_datadir}/%{name}
 
 %if 0%{?suse_version} < 1500
+%{python2_sitelib}/*
 %doc LICENSE
 %else
+%{python3_sitelib}/*
 %license LICENSE
 %endif
 

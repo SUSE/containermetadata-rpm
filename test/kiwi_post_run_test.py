@@ -7,8 +7,7 @@ from containerinfoRPM.kiwi_post_run import (
     get_image_release,
     main,
     run_command,
-    make_spec_from_template,
-    init
+    make_spec_from_template
 )
 
 open_to_patch = '{0}.open'.format(
@@ -204,11 +203,3 @@ class TestContainerInfoRPM(object):
                 '/usr/src/packages/OTHER'
             )
         ]
-
-    @patch((
-        'containerinfoRPM.'
-        'kiwi_post_run.main'
-    ))
-    def test_init(self, mock_main):
-        init('__main__')
-        assert mock_main.called

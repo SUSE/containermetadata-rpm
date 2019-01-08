@@ -6,21 +6,6 @@ import platform
 import re
 
 from setuptools import setup
-from distutils.command import install as distutils_install
-from distutils.command.sdist import sdist as distutils_sdist
-
-
-class install(distutils_install.install):
-    """
-    Custom install command
-    """
-    sub_commands = [
-        ('install_lib', lambda self:False),
-        ('install_headers', lambda self:False),
-        ('install_scripts', lambda self:True),
-        ('install_data', lambda self:True),
-        ('install_egg_info', lambda self:False),
-    ]
 
 
 setup(
@@ -39,10 +24,10 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Topic :: Development :: Tools :: Building',
     ],
-    cmdclass = {
-        'install':  install,
-        'sdist':    distutils_sdist
-    },
-    scripts = ['kiwi_post_run'],
-    data_files={'containerinfoRPM/spec.template'}
+    data_files={'containerinfoRPM/spec.template'},
+    entry_points = {
+        'console_scripts': [
+            'kiwi_post_run = containerinfoRPM.kiwi_post_run:main'
+        ]
+    }
 )

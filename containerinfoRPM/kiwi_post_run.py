@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-#
 # Copyright (c) 2019 SUSE Linux GmbH.  All rights reserved.
 #
 # This file is part of containerinfo-rpm.
@@ -192,11 +189,3 @@ def make_spec_from_template(
     templateEnv = jinja2.Environment(loader=templateLoader)
     template = templateEnv.get_template(template_file)
     template.stream(image=image_data).dump(spec_file)
-
-
-def init(__name__):
-    if __name__ == '__main__':
-        main()
-
-
-init(__name__)
