@@ -1,6 +1,8 @@
 # containerinfo-rpm
 
-TODO
+[![Build Status](https://travis-ci.com/davidcassany/containerinfo-rpm.svg?branch=master)](https://travis-ci.com/davidcassany/containerinfo-rpm)
+
+TBC
 
 ## Development
 
@@ -19,13 +21,8 @@ $ python3 -m venv .env3
 $ source .env3/bin/activate
 
 # Install development dependencies
-$ pip install -r requirements.txt
+$ pip install -r dev-requirements.txt
 
 # Run tests and code style checks
 $ tox
 ```
-
-## Usage
-
-TODO
-
