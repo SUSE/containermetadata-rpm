@@ -66,8 +66,8 @@ data:
 
 ```json
 {
-    'namespace': ['mytag', 'mytag-1.2.3'],
-    'alternate/namespace': ['myothertag-1.2.3-4.3']
+    "namespace": ["mytag", "mytag-1.2.3"],
+    "alternate/namespace": ["myothertag-1.2.3-4.3"]
 }
 ```
 
