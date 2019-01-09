@@ -1,6 +1,7 @@
 # containerinfo-rpm
 
 [![Build Status](https://travis-ci.com/davidcassany/containerinfo-rpm.svg?branch=master)](https://travis-ci.com/davidcassany/containerinfo-rpm)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/33b0745073f042faab10bc4f30debfa4)](https://www.codacy.com/app/davidcassany/containerinfo-rpm?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=davidcassany/containerinfo-rpm&amp;utm_campaign=Badge_Grade)
 
 TBC
 

@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-import os
-import platform
-import re
-
 from setuptools import setup
 
 
