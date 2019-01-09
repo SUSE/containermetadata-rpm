@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name = "containerinfo-rpm",
-    version = '0.1.1',
+    version = '0.1.2',
     author = "David Cassany",
     author_email = "dcassany@suse.com",
     description = "OBS KIWI post run hook to package container metadata",
