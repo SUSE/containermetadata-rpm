@@ -19,10 +19,17 @@ else
     abort "setup.py script not found!"
 fi
 
+dashes="-------------------------------------------------------------------"
+header="${dashes}%n%cd - %an <%ae>"
+body="- Commit %h on %ad: %n%n%w(77,2,2)%B"
+datef="%a %b %e %H:%M:%S %Z %Y"
+
 pushd ${workdir} >/dev/null
     rm -rf ./dist
     ./setup.py sdist
     version=$(grep "version =" setup.py | sed "s|.*version = '\(.*\)',$|\1|g")
     sed "s|^Version:\(.*\)__VERSION__.*$|Version:\1${version}|g" \
         ./packaging/suse/containerinfo-rpm.spec > ./dist/containerinfo-rpm.spec
+    git log --no-merges --format="${header}%n%n${body}" \
+		--date="format-local:${datef}" > ./dist/containerinfo-rpm.changes
 popd >/dev/null
