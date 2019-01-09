@@ -20,6 +20,7 @@ def test_get_image_references():
     mock_result.xml_state.get_container_config.return_value = {
         'container_name': 'myname', 'container_tag': 'mytag'
     }
+    mock_result.xml_state.build_type.get_image.return_value = 'docker'
     assert get_image_references(
         mock_result, '.', 'version', 'release'
     ) == {
@@ -34,6 +35,7 @@ def test_get_image_references_no_tag():
     mock_result.xml_state.get_container_config.return_value = {
         'container_name': 'myname'
     }
+    mock_result.xml_state.build_type.get_image.return_value = 'docker'
     assert get_image_references(
         mock_result, '.', '1.2.3', '4.5'
     ) == {
@@ -46,6 +48,7 @@ def test_get_image_references_no_tag():
 def test_get_image_references_no_name():
     mock_result = Mock()
     mock_result.xml_state.get_container_config.return_value = {}
+    mock_result.xml_state.build_type.get_image.return_value = 'docker'
     assert get_image_references(
         mock_result, '.', '12.3', '1'
     ) == {
@@ -61,6 +64,7 @@ def test_get_image_references_additional_tags():
         'container_name': 'namespace', 'container_tag': 'mytag',
         'additional_tags': ['myothertag', 'anothertag']
     }
+    mock_result.xml_state.build_type.get_image.return_value = 'docker'
     assert get_image_references(
         mock_result, '.', '12.3', '1'
     ) == {
@@ -72,6 +76,7 @@ def test_get_image_references_additional_tags():
 def test_get_image_references_no_kiwi_file():
     mock_result = Mock()
     mock_result.xml_state.get_container_config.return_value = {}
+    mock_result.xml_state.build_type.get_image.return_value = 'docker'
     exception = False
     try:
         get_image_references(mock_result, 'src_dir', '12.3', '1')
@@ -187,6 +192,7 @@ def test_main(
     mock_result.xml_state.get_container_config.return_value = {
         'container_name': 'myname', 'container_tag': 'mytag'
     }
+    mock_result.xml_state.build_type.get_image.return_value = 'docker'
     mock_glob.return_value = [
         'mydir/myimage.1.2.3-Build2.1.docker.tar',
         'mydir/myimage.1.2.3-Build2.1.docker.tar.sha256'
@@ -215,3 +221,11 @@ def test_main(
             '/usr/src/packages/OTHER'
         )
     ]
+
+
+@patch('kiwi.system.result.Result.load')
+def test_main_no_docker_image(mock_load):
+    mock_result = Mock()
+    mock_load.return_value = mock_result
+    mock_result.xml_state.build_type.get_image.return_value = 'oci'
+    main()

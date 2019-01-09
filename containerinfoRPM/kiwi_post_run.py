@@ -44,6 +44,11 @@ def main():
     image['url'] = 'FIXME'
 
     result = Result.load('{0}/kiwi.result'.format(image['image_dir']))
+
+    if result.xml_state.build_type.get_image() != 'docker':
+        # Just leave if the image type is not docker
+        return
+
     image['version'] = result.xml_state.get_image_version()
     image['name'] = result.xml_state.xml_data.get_name()
     image['release'] = get_image_release(

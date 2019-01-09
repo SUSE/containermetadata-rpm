@@ -5,7 +5,7 @@
      OBS-AddTag: alternate/namespace:myothertag-<VERSION>-<RELEASE>
 -->
 
-<image schemaversion="6.5" name="caasp-caasp-dex">
+<image schemaversion="6.5" name="dummytest">
   <description type="system">
     <author>SUSE Containers Team</author>
     <contact>containers@suse.com</contact>
