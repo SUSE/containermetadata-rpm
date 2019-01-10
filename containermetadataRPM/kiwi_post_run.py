@@ -1,8 +1,8 @@
 # Copyright (c) 2019 SUSE Linux GmbH.  All rights reserved.
 #
-# This file is part of containerinfo-rpm.
+# This file is part of containermetadata-rpm.
 #
-#   containerinfo-rpm is free software: you can redistribute
+#   containermetadata-rpm is free software: you can redistribute
 #   and/or modify it under the terms of the GNU General Public License
 #   as published by the Free Software Foundation, either version 3 of
 #   the License, or (at your option) any later version.
@@ -13,7 +13,8 @@
 #   See the GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with containerinfo-rpm.  If not, see <http://www.gnu.org/licenses/>.
+#   along with containermetadata-rpm.  If not, see
+#   <http://www.gnu.org/licenses/>.
 #
 
 import os
@@ -30,7 +31,7 @@ from lxml import etree
 
 def main():
     """
-    main-entry point for program, expects dict with arguments from docopt()
+    main-entry point for program
     """
     image = dict()
     if 'TOPDIR' not in os.environ:
@@ -61,18 +62,20 @@ def main():
         image['name']
     )
 
-    make_spec_from_template(image, '{0}/{1}-info.spec'.format(
+    make_spec_from_template(image, '{0}/{1}-metadata.spec'.format(
         image['build_dir'], image['name']
     ))
 
     with open(
-        '{0}/{1}-info'.format(image['sources'], image['name']), 'w'
+        '{0}/{1}-metadata'.format(image['sources'], image['name']), 'w'
     ) as metadata:
         json.dump(image['references'], metadata)
 
     run_command([
         'rpmbuild', '--target', image['arch'],
-        '-ba', '{0}/{1}-info.spec'.format(image['build_dir'], image['name'])
+        '-ba', '{0}/{1}-metadata.spec'.format(
+            image['build_dir'], image['name']
+        )
     ])
 
     shutil.move(
@@ -187,7 +190,7 @@ def run_command(command):
 
 
 def make_spec_from_template(
-    image_data, spec_file, search_path='/usr/share/containerinfo-rpm',
+    image_data, spec_file, search_path='/usr/share/containermetadata-rpm',
     template_file='spec.template'
 ):
     templateLoader = jinja2.FileSystemLoader(search_path)

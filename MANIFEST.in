@@ -1,4 +1,4 @@
-graft containerinfoRPM 
+graft containermetadataRPM 
 
 global-exclude *.py[co] __pycache__
 exclude .gitignore

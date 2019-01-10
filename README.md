@@ -1,7 +1,7 @@
-# containerinfo-rpm
+# containermetadata-rpm
 
-[![Build Status](https://travis-ci.com/davidcassany/containerinfo-rpm.svg?branch=master)](https://travis-ci.com/davidcassany/containerinfo-rpm)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8cf428bba89e4e8c8cc1cb91920b861e)](https://www.codacy.com/app/davidcassany/containerinfo-rpm?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=davidcassany/containerinfo-rpm&amp;utm_campaign=Badge_Grade)
+[![Build Status](https://travis-ci.com/davidcassany/containermetadata-rpm.svg?branch=master)](https://travis-ci.com/davidcassany/containermetadata-rpm)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8cf428bba89e4e8c8cc1cb91920b861e)](https://www.codacy.com/app/davidcassany/containermetadata-rpm?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=davidcassany/containermetadata-rpm&amp;utm_campaign=Badge_Grade)
 
 This is KIWI hook for OBS that creates a metadata package for container images.
 This the created RPM only contains a single plain text file with file with all
@@ -19,7 +19,7 @@ the following:
 Type: kiwi
 Repotype: rpm-md
 Patterntype: none
-Preinstall: containerinfo-rpm
+Preinstall: containermetadata-rpm
 %endif
 ```
 
@@ -60,8 +60,8 @@ Consider the following sources:
 ```
 
 An image being build with this sources would produce a package called
-`dummytest`. This package includes a single file
-`/usr/share/suse-containerinfo-images/dummytest-info` containing the following
+`dummytest-metadata`. This package includes a single file
+`/usr/share/suse-containermetadata-images/dummytest-metadata` containing the following
 data:
 
 ```json
@@ -81,7 +81,7 @@ To set the development environment consider the following commands:
 
 ```bash
 # Get into the repository folder
-$ cd containerinfo-rpm
+$ cd containermetadata-rpm
 
 # Initiate the python3 virtualenv
 $ python3 -m venv .env3

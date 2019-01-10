@@ -1,7 +1,7 @@
 import sys
 from mock import patch, mock_open, call, Mock, ANY
 
-from containerinfoRPM.kiwi_post_run import (
+from containermetadataRPM.kiwi_post_run import (
     get_image_references,
     get_bundled_image_file,
     get_image_release,
@@ -86,7 +86,7 @@ def test_get_image_references_no_kiwi_file():
     assert exception
 
 
-@patch('containerinfoRPM.kiwi_post_run.glob.glob')
+@patch('containermetadataRPM.kiwi_post_run.glob.glob')
 def test_get_bundled_image_file(mock_glob):
     mock_glob.return_value = [
         'mydir/myimage.docker.tar', 'mydir/myimage.docker.tar.sha256'
@@ -96,7 +96,7 @@ def test_get_bundled_image_file(mock_glob):
     ) == 'mydir/myimage.docker.tar'
 
 
-@patch('containerinfoRPM.kiwi_post_run.glob.glob')
+@patch('containermetadataRPM.kiwi_post_run.glob.glob')
 def test_get_bundled_image_file_fail(mock_glob):
     mock_glob.return_value = [
         'mydir/myimage.docker.tar.sha256'
@@ -131,14 +131,14 @@ def test_run_command_failure(mock_subprocess):
         assert 'Command "dummycmd arg1" failed' in str(e)
 
 
-@patch('containerinfoRPM.kiwi_post_run.get_bundled_image_file')
+@patch('containermetadataRPM.kiwi_post_run.get_bundled_image_file')
 def test_get_image_release(mock_bundled_file):
     mock_bundled_file.return_value = \
         'mydir/myimage.1.2-Build2.1.docker.tar'
     assert get_image_release('mydir', 'myimage', '1.2') == '2.1'
 
 
-@patch('containerinfoRPM.kiwi_post_run.get_bundled_image_file')
+@patch('containermetadataRPM.kiwi_post_run.get_bundled_image_file')
 def test_get_image_release_failure(mock_bundled_file):
     exception = False
     mock_bundled_file.return_value = 'mydir/myimage.Build2.1.docker.tar'
@@ -150,14 +150,14 @@ def test_get_image_release_failure(mock_bundled_file):
     assert exception
 
 
-@patch('containerinfoRPM.kiwi_post_run.get_bundled_image_file')
+@patch('containermetadataRPM.kiwi_post_run.get_bundled_image_file')
 def test_get_image_release_no_release(mock_bundled_file):
     mock_bundled_file.return_value = 'mydir/myimage.1.2-Build.docker.tar'
     assert get_image_release('mydir', 'myimage', '1.2') == '0'
 
 
 @patch((
-    'containerinfoRPM.kiwi_post_run'
+    'containermetadataRPM.kiwi_post_run'
     '.jinja2.environment.TemplateStream.dump'
 ))
 def test_make_spec_from_template(mock_dump):
@@ -168,18 +168,18 @@ def test_make_spec_from_template(mock_dump):
     image_data['description'] = 'Package description'
     make_spec_from_template(
         image_data, 'package.spec',
-        '../containerinfoRPM', 'spec.template'
+        '../containermetadataRPM', 'spec.template'
     )
     mock_dump.assert_called_once_with('package.spec')
 
 
 @patch(open_to_patch, new_callable=mock_open)
-@patch('containerinfoRPM.kiwi_post_run.etree.iterparse')
-@patch('containerinfoRPM.kiwi_post_run.json.dump')
-@patch('containerinfoRPM.kiwi_post_run.make_spec_from_template')
-@patch('containerinfoRPM.kiwi_post_run.run_command')
-@patch('containerinfoRPM.kiwi_post_run.shutil.move')
-@patch('containerinfoRPM.kiwi_post_run.glob.glob')
+@patch('containermetadataRPM.kiwi_post_run.etree.iterparse')
+@patch('containermetadataRPM.kiwi_post_run.json.dump')
+@patch('containermetadataRPM.kiwi_post_run.make_spec_from_template')
+@patch('containermetadataRPM.kiwi_post_run.run_command')
+@patch('containermetadataRPM.kiwi_post_run.shutil.move')
+@patch('containermetadataRPM.kiwi_post_run.glob.glob')
 @patch('kiwi.system.result.Result.load')
 def test_main(
     mock_load, mock_glob, mock_move, mock_command,
@@ -199,17 +199,17 @@ def test_main(
     ]
     main()
     mock_file.assert_called_once_with(
-        '/usr/src/packages/SOURCES/myimage-info', 'w'
+        '/usr/src/packages/SOURCES/myimage-metadata', 'w'
     )
     mock_dump.assert_called_once_with({'myname': ['mytag']}, ANY)
     mock_command.assert_called_once_with(
         [
             'rpmbuild', '--target', 'x86_64', '-ba',
-            '/usr/lib/build/myimage-info.spec'
+            '/usr/lib/build/myimage-metadata.spec'
         ]
     )
     mock_template.assert_called_once_with(
-        ANY, '/usr/lib/build/myimage-info.spec'
+        ANY, '/usr/lib/build/myimage-metadata.spec'
     )
     assert mock_move.call_args_list == [
         call(
