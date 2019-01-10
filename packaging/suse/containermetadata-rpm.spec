@@ -1,5 +1,5 @@
 #
-# spec file for package containerinfo-rpm
+# spec file for package containermetadata-rpm
 #
 # Copyright (c) 2019 SUSE LINUX GmbH, Nuernberg, Germany.
 #
@@ -26,13 +26,13 @@
 %global python3_sitelib %(%{__python3} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 %endif
 
-Name:           containerinfo-rpm
+Name:           containermetadata-rpm
 Version:        __VERSION__
 Release:        0
 Summary:        OBS KIWI post run hook to package container metadata
 License:        GPL-3.0-or-later
 Group:          Development/Tools/Building
-#Url:           TODO
+Url:            https://github.com/davidcassany/containermetadata-rpm
 Source0:        %{name}-%{version}.tar.gz
 %if 0%{?suse_version} > 1315
 BuildRequires:  python3-setuptools
@@ -48,7 +48,9 @@ Requires:       python-kiwi
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
 %description
-NEED TO REPLACE THIS
+This is an OBS KIWI post run hook for container images builds. This hook
+collects all the references for the build image and packages it in a new
+RPM that contains them in a metadata file.
 
 %prep
 %setup -q -n %{name}-%{version}

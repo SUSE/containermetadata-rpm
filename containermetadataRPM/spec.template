@@ -14,7 +14,7 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
-Name:           {{image['name']}}
+Name:           {{image['name']}}-metadata
 Version:        {{image['version']}}
 Release:        {{image['release']}}
 License:        Apache-2.0
@@ -22,7 +22,7 @@ Summary:        {{image['description']}}
 Group:          System/Management
 URL:            {{image['url']}}
 #Source0:        LICENSE
-Source1:        {{image['name']}}-info
+Source1:        {{image['name']}}-metadata
 %description
 {{image['description']}}
 
@@ -32,12 +32,12 @@ cp %{SOURCE1} %{_builddir}
 %build
 
 %install
-mkdir -p %{buildroot}%{_datadir}/suse-containerinfo-images
-install -m 644 %{SOURCE1} %{buildroot}%{_datadir}/suse-containerinfo-images
+mkdir -p %{buildroot}%{_datadir}/suse-containermetadata-images
+install -m 644 %{SOURCE1} %{buildroot}%{_datadir}/suse-containermetadata-images
 
 %files
 %defattr(-,root,root)
 #%license LICENSE
-%{_datadir}/suse-containerinfo-images
+%{_datadir}/suse-containermetadata-images
 
 #%changelog

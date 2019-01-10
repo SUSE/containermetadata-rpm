@@ -3,7 +3,7 @@
 abort()     { log "FATAL: $*" ; exit 1 ; }
 usage()     {
     cat <<USAGE
-usage (from containerinfo-rpm root directory):
+usage (from containermetadata-rpm root directory):
     ./packaging/suse/make_spec.sh
 USAGE
 }
@@ -29,7 +29,7 @@ pushd ${workdir} >/dev/null
     ./setup.py sdist
     version=$(grep "version =" setup.py | sed "s|.*version = '\(.*\)',$|\1|g")
     sed "s|^Version:\(.*\)__VERSION__.*$|Version:\1${version}|g" \
-        ./packaging/suse/containerinfo-rpm.spec > ./dist/containerinfo-rpm.spec
+        ./packaging/suse/containermetadata-rpm.spec > ./dist/containermetadata-rpm.spec
     git log --no-merges --format="${header}%n%n${body}" \
-		--date="format-local:${datef}" > ./dist/containerinfo-rpm.changes
+		--date="format-local:${datef}" > ./dist/containermetadata-rpm.changes
 popd >/dev/null
