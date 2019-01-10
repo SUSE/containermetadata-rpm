@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-abort()     { log "FATAL: $@" ; exit 1 ; }
+abort()     { log "FATAL: $*" ; exit 1 ; }
 usage()     {
     cat <<USAGE
 usage (from containerinfo-rpm root directory):
