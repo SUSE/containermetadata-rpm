@@ -46,6 +46,7 @@ Requires:       python-lxml
 Requires:       python-kiwi
 %endif
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+BuildArch:      noarch
 
 %description
 This is an OBS KIWI post run hook for container images builds. This hook
