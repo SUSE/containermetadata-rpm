@@ -30,9 +30,7 @@ Consider the following sources:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 
-<!--
-     OBS-AddTag: namespace:mytag-<VERSION>
-     OBS-AddTag: alternate/namespace:myothertag-<VERSION>-<RELEASE>
+<!-- OBS-AddTag: namespace:mytag-<VERSION> alternate/namespace:myothertag-<VERSION>-<RELEASE>
 -->
 
 <image schemaversion="6.5" name="dummytest">
@@ -95,3 +93,6 @@ $ pip install -r dev-requirements.txt
 # Run tests and code style checks
 $ tox
 ```
+
+Running the `./packaging/suse/make_spec.sh` script will create RPM package
+sources (source tarball, spec and changes file) in  `./dist` folder.
