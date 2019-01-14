@@ -79,14 +79,14 @@ def main():
     ])
 
     shutil.move(
-        '{0}/RPMS/{1}/{2}-{3}-{4}.{1}.rpm'.format(
+        '{0}/RPMS/{1}/{2}-metadata-{3}-{4}.{1}.rpm'.format(
             image['topdir'], image['arch'], image['name'],
             image['version'], image['release']
         ),
         '{0}/OTHER'.format(image['topdir'])
     )
     shutil.move(
-        '{0}/SRPMS/{1}-{2}-{3}.src.rpm'.format(
+        '{0}/SRPMS/{1}-metadata-{2}-{3}.src.rpm'.format(
             image['topdir'], image['name'],
             image['version'], image['release']
         ),

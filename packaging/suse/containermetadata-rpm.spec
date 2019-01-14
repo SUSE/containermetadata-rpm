@@ -36,7 +36,7 @@ Url:            https://github.com/davidcassany/containermetadata-rpm
 Source0:        %{name}-%{version}.tar.gz
 %if 0%{?suse_version} > 1315
 BuildRequires:  python3-setuptools
-Requires:       python3-jinja2
+Requires:       python3-Jinja2
 Requires:       python3-lxml
 Requires:       python3-kiwi
 %else

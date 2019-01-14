@@ -213,11 +213,14 @@ def test_main(
     )
     assert mock_move.call_args_list == [
         call(
-            '/usr/src/packages/RPMS/x86_64/myimage-1.2.3-2.1.x86_64.rpm',
+            (
+                '/usr/src/packages/RPMS/x86_64/'
+                'myimage-metadata-1.2.3-2.1.x86_64.rpm'
+            ),
             '/usr/src/packages/OTHER'
         ),
         call(
-            '/usr/src/packages/SRPMS/myimage-1.2.3-2.1.src.rpm',
+            '/usr/src/packages/SRPMS/myimage-metadata-1.2.3-2.1.src.rpm',
             '/usr/src/packages/OTHER'
         )
     ]
