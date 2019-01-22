@@ -1,6 +1,6 @@
 # containermetadata-rpm
 
-[![Build Status](https://travis-ci.com/davidcassany/containermetadata-rpm.svg?branch=master)](https://travis-ci.com/davidcassany/containermetadata-rpm)
+[![Build Status](https://travis-ci.org/kubic-project/containermetadata-rpm.svg?branch=master)](https://travis-ci.org/kubic-project/containermetadata-rpm)
 
 This is KIWI hook for OBS that creates a metadata package for container images.
 This the created RPM only contains a single plain text file with file with all
@@ -29,8 +29,7 @@ Consider the following sources:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- OBS-AddTag: namespace:mytag-<VERSION> alternate/namespace:myothertag-<VERSION>-<RELEASE>
--->
+<!-- OBS-AddTag: namespace:mytag-<VERSION> alternate/namespace:myothertag-<VERSION>-<RELEASE> -->
 
 <image schemaversion="6.5" name="dummytest">
   <description type="system">
