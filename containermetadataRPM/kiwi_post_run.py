@@ -20,9 +20,7 @@
 import os
 import subprocess
 import jinja2
-import platform
 import shutil
-import glob
 import json
 from kiwi.system.result import Result
 from kiwi.defaults import Defaults
@@ -33,16 +31,29 @@ def main():
     """
     main-entry point for program
     """
-    image = dict()
+    image = {}
     if 'TOPDIR' not in os.environ:
         image['topdir'] = '/usr/src/packages'
     image['image_dir'] = '{0}/KIWI-docker'.format(image['topdir'])
     image['bundle_dir'] = '{0}/KIWI'.format(image['topdir'])
     image['sources'] = '{0}/SOURCES'.format(image['topdir'])
     image['build_dir'] = '/usr/lib/build'
-    image['arch'] = platform.machine()
 
-    image['url'] = 'FIXME'
+    if 'BUILD_DIST' not in os.environ:
+        raise Exception('Not building inside build service')
+
+    if not os.path.exists('{0}/kiwi.result'.format(image['image_dir'])):
+        raise Exception('Kiwi result file not found')
+
+    image['build_data'] = os.environ['BUILD_DIST'].replace('.dist', '.data')
+
+    if not os.path.exists(image['build_data']):
+        print(
+            "Data file {0} not found. Skipping metadata package build".format(
+                image['build_data']
+            )
+        )
+        return
 
     result = Result.load('{0}/kiwi.result'.format(image['image_dir']))
 
@@ -50,17 +61,23 @@ def main():
         # Just leave if the image type is not docker
         return
 
+    build_data = variable_file_parser(image['build_data'])
+
     image['version'] = result.xml_state.get_image_version()
     image['name'] = result.xml_state.xml_data.get_name()
-    image['release'] = get_image_release(
-        image['bundle_dir'], image['name'], image['version']
+    image['release'] = build_data['RELEASE']
+    image['arch'] = build_data['BUILD_ARCH'].partition(':')[0]
+    image['disturl'] = build_data['DISTURL']
+    image['kiwi_file'] = '{0}/{1}'.format(
+        image['sources'], build_data['RECIPEFILE']
     )
     image['references'] = get_image_references(
-        result, image['sources'], image['version'], image['release']
+        result, image['kiwi_file'], image['version'], image['release']
     )
     image['description'] = 'Referencing metadata for {0} image'.format(
         image['name']
     )
+    image['url'] = 'https://github.com/kubic-project/containermetadata-rpm'
 
     make_spec_from_template(image, '{0}/{1}-metadata.spec'.format(
         image['build_dir'], image['name']
@@ -71,12 +88,14 @@ def main():
     ) as metadata:
         json.dump(image['references'], metadata)
 
-    run_command([
-        'rpmbuild', '--target', image['arch'],
-        '-ba', '{0}/{1}-metadata.spec'.format(
-            image['build_dir'], image['name']
-        )
-    ])
+    rpmbuild = ['rpmbuild', '--target', image['arch'], '-ba']
+    if 'disturl' in image:
+        rpmbuild.extend(['--define', '"disturl {0}"'.format(image['disturl'])])
+    rpmbuild.append('{0}/{1}-metadata.spec'.format(
+        image['build_dir'], image['name']
+    ))
+
+    run_command(rpmbuild)
 
     shutil.move(
         '{0}/RPMS/{1}/{2}-metadata-{3}-{4}.{1}.rpm'.format(
@@ -94,7 +113,7 @@ def main():
     )
 
 
-def get_image_references(result, src_dir, version, release):
+def get_image_references(result, kiwi_file, version, release):
     references = {}
     config = result.xml_state.get_container_config()
 
@@ -109,19 +128,15 @@ def get_image_references(result, src_dir, version, release):
     if 'additional_tags' in config:
         references[config['container_name']].extend(config['additional_tags'])
 
-    return add_additional_OBS_references(src_dir, version, release, references)
+    return add_additional_OBS_references(
+        kiwi_file, version, release, references
+    )
 
 
-def add_additional_OBS_references(src_dir, version, release, references):
-    config_file = '{0}/config.xml'.format(src_dir)
-    if not os.path.exists(config_file):
-        lst = glob.glob('{0}/*.kiwi')
-        if not lst:
-            raise Exception('KIWI description file not found')
-        config_file = lst[0]
+def add_additional_OBS_references(kiwi_file, version, release, references):
     addTag_comments = [
         elem.text for action, elem in etree.iterparse(
-            config_file, events=("comment", "start")
+            kiwi_file, events=("comment", "start")
         ) if action == 'comment' and 'OBS-AddTag:' in elem.text
     ]
     for entry in [
@@ -144,29 +159,14 @@ def add_additional_OBS_references(src_dir, version, release, references):
     return references
 
 
-def get_bundled_image_file(image_name, bundle_dir):
-    image_file = [
-        f for f in glob.glob('{0}/{1}*docker.tar*'.format(
-            bundle_dir, image_name
-        )) if not f.endswith('sha256')
-    ]
-    if not image_file:
-        raise Exception('Could not find the bundled image')
-    return image_file[0]
-
-
-def get_image_release(bundle_dir, img_name, img_version):
-    bundle_file = get_bundled_image_file(img_name, bundle_dir)
-    meta_part = bundle_file.partition(img_name)[2].partition('.docker.tar')[0]
-    version_part = meta_part.partition(img_version)
-    if not version_part[1]:
-        raise Exception('Version not found in image name')
-    release = version_part[2].partition('Build')[2]
-
-    if not release:
-        release = '0'
-
-    return release
+def variable_file_parser(filepath, separator="="):
+    variables = {}
+    with open(filepath, "r") as f:
+        for line in f:
+            if separator in line:
+                line = line.partition(separator)
+                variables[line[0]] = line[2].rstrip('\n\r').strip('\'"')
+    return variables
 
 
 def run_command(command):
