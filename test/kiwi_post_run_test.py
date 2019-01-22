@@ -1,13 +1,13 @@
 import sys
+import io
 from mock import patch, mock_open, call, Mock, ANY
 
 from containermetadataRPM.kiwi_post_run import (
     get_image_references,
-    get_bundled_image_file,
-    get_image_release,
     main,
     run_command,
-    make_spec_from_template
+    make_spec_from_template,
+    variable_file_parser
 )
 
 open_to_patch = '{0}.open'.format(
@@ -22,7 +22,7 @@ def test_get_image_references():
     }
     mock_result.xml_state.build_type.get_image.return_value = 'docker'
     assert get_image_references(
-        mock_result, '.', 'version', 'release'
+        mock_result, 'config.xml', 'version', 'release'
     ) == {
         'myname': ['mytag'],
         'alternate/namespace': ['myothertag-version-release'],
@@ -37,7 +37,7 @@ def test_get_image_references_no_tag():
     }
     mock_result.xml_state.build_type.get_image.return_value = 'docker'
     assert get_image_references(
-        mock_result, '.', '1.2.3', '4.5'
+        mock_result, 'config.xml', '1.2.3', '4.5'
     ) == {
         'myname': ['latest'],
         'alternate/namespace': ['myothertag-1.2.3-4.5'],
@@ -50,7 +50,7 @@ def test_get_image_references_no_name():
     mock_result.xml_state.get_container_config.return_value = {}
     mock_result.xml_state.build_type.get_image.return_value = 'docker'
     assert get_image_references(
-        mock_result, '.', '12.3', '1'
+        mock_result, 'config.xml', '12.3', '1'
     ) == {
         'kiwi-container': ['latest'],
         'alternate/namespace': ['myothertag-12.3-1'],
@@ -66,48 +66,11 @@ def test_get_image_references_additional_tags():
     }
     mock_result.xml_state.build_type.get_image.return_value = 'docker'
     assert get_image_references(
-        mock_result, '.', '12.3', '1'
+        mock_result, 'config.xml', '12.3', '1'
     ) == {
         'alternate/namespace': ['myothertag-12.3-1'],
         'namespace': ['mytag', 'myothertag', 'anothertag', 'mytag-12.3']
     }
-
-
-def test_get_image_references_no_kiwi_file():
-    mock_result = Mock()
-    mock_result.xml_state.get_container_config.return_value = {}
-    mock_result.xml_state.build_type.get_image.return_value = 'docker'
-    exception = False
-    try:
-        get_image_references(mock_result, 'src_dir', '12.3', '1')
-    except Exception as e:
-        assert 'KIWI description file not found' in str(e)
-        exception = True
-    assert exception
-
-
-@patch('containermetadataRPM.kiwi_post_run.glob.glob')
-def test_get_bundled_image_file(mock_glob):
-    mock_glob.return_value = [
-        'mydir/myimage.docker.tar', 'mydir/myimage.docker.tar.sha256'
-    ]
-    assert get_bundled_image_file(
-        'myimage', 'mydir'
-    ) == 'mydir/myimage.docker.tar'
-
-
-@patch('containermetadataRPM.kiwi_post_run.glob.glob')
-def test_get_bundled_image_file_fail(mock_glob):
-    mock_glob.return_value = [
-        'mydir/myimage.docker.tar.sha256'
-    ]
-    exception = False
-    try:
-        get_bundled_image_file('myimage', 'mydir')
-    except Exception as e:
-        exception = True
-        assert 'Could not find the bundled image' in str(e)
-    assert exception
 
 
 @patch('subprocess.Popen')
@@ -131,31 +94,6 @@ def test_run_command_failure(mock_subprocess):
         assert 'Command "dummycmd arg1" failed' in str(e)
 
 
-@patch('containermetadataRPM.kiwi_post_run.get_bundled_image_file')
-def test_get_image_release(mock_bundled_file):
-    mock_bundled_file.return_value = \
-        'mydir/myimage.1.2-Build2.1.docker.tar'
-    assert get_image_release('mydir', 'myimage', '1.2') == '2.1'
-
-
-@patch('containermetadataRPM.kiwi_post_run.get_bundled_image_file')
-def test_get_image_release_failure(mock_bundled_file):
-    exception = False
-    mock_bundled_file.return_value = 'mydir/myimage.Build2.1.docker.tar'
-    try:
-        get_image_release('mydir', 'myimage', '1.2')
-    except Exception as e:
-        exception = True
-        assert 'Version not found in image name' in str(e)
-    assert exception
-
-
-@patch('containermetadataRPM.kiwi_post_run.get_bundled_image_file')
-def test_get_image_release_no_release(mock_bundled_file):
-    mock_bundled_file.return_value = 'mydir/myimage.1.2-Build.docker.tar'
-    assert get_image_release('mydir', 'myimage', '1.2') == '0'
-
-
 @patch((
     'containermetadataRPM.kiwi_post_run'
     '.jinja2.environment.TemplateStream.dump'
@@ -173,18 +111,71 @@ def test_make_spec_from_template(mock_dump):
     mock_dump.assert_called_once_with('package.spec')
 
 
+@patch(open_to_patch)
+def test_variable_file_parser(mock_open):
+    mock_open.return_value = io.StringIO(u"""
+RELEASE="12.3"
+DISTURL='obs://someurl'
+Will not be parsed
+BUILD_ARCH=x86_64
+    """)
+    data = variable_file_parser('some_file')
+    assert data == {
+        'RELEASE': '12.3', 'DISTURL': 'obs://someurl', 'BUILD_ARCH': 'x86_64'
+    }
+
+
+def test_main_no_build_service():
+    exception = False
+    try:
+        main()
+    except Exception as e:
+        exception = True
+        assert 'Not building inside build service' in str(e)
+    assert exception
+
+
+@patch('containermetadataRPM.kiwi_post_run.os')
+def test_main_no_kiwi_result(mock_os):
+    mock_os.environ = {'BUILD_DIST': 'build.dist'}
+    mock_os.path.exists.return_value = False
+    exception = False
+    try:
+        main()
+    except Exception as e:
+        exception = True
+        assert 'Kiwi result file not found' in str(e)
+    assert exception
+
+
+@patch('containermetadataRPM.kiwi_post_run.os')
+def test_main_no_build_data(mock_os):
+    mock_os.environ = {'BUILD_DIST': 'build.dist'}
+    mock_os.path.exists.side_effect = lambda x: (
+        False if 'build.data' == x else True
+    )
+    main()
+
+
+@patch('containermetadataRPM.kiwi_post_run.variable_file_parser')
+@patch('containermetadataRPM.kiwi_post_run.os')
 @patch(open_to_patch, new_callable=mock_open)
 @patch('containermetadataRPM.kiwi_post_run.etree.iterparse')
 @patch('containermetadataRPM.kiwi_post_run.json.dump')
 @patch('containermetadataRPM.kiwi_post_run.make_spec_from_template')
 @patch('containermetadataRPM.kiwi_post_run.run_command')
 @patch('containermetadataRPM.kiwi_post_run.shutil.move')
-@patch('containermetadataRPM.kiwi_post_run.glob.glob')
 @patch('kiwi.system.result.Result.load')
 def test_main(
-    mock_load, mock_glob, mock_move, mock_command,
-    mock_template, mock_dump, mock_iterparse, mock_file
+    mock_load, mock_move, mock_command, mock_template,
+    mock_dump, mock_iterparse, mock_file, mock_os, mock_parser
 ):
+    mock_parser.return_value = {
+        'RELEASE': '2.1', 'BUILD_ARCH': 'x86_64',
+        'DISTURL': 'obs://someurl', 'RECIPEFILE': 'config.xml'
+    }
+    mock_os.environ = {'BUILD_DIST': 'build.dist'}
+    mock_os.path.exists.return_value = True
     mock_result = Mock()
     mock_load.return_value = mock_result
     mock_result.xml_state.get_image_version.return_value = '1.2.3'
@@ -193,10 +184,6 @@ def test_main(
         'container_name': 'myname', 'container_tag': 'mytag'
     }
     mock_result.xml_state.build_type.get_image.return_value = 'docker'
-    mock_glob.return_value = [
-        'mydir/myimage.1.2.3-Build2.1.docker.tar',
-        'mydir/myimage.1.2.3-Build2.1.docker.tar.sha256'
-    ]
     main()
     mock_file.assert_called_once_with(
         '/usr/src/packages/SOURCES/myimage-metadata', 'w'
@@ -204,8 +191,8 @@ def test_main(
     mock_dump.assert_called_once_with({'myname': ['mytag']}, ANY)
     mock_command.assert_called_once_with(
         [
-            'rpmbuild', '--target', 'x86_64', '-ba',
-            '/usr/lib/build/myimage-metadata.spec'
+            'rpmbuild', '--target', 'x86_64', '-ba', '--define',
+            '"disturl obs://someurl"', '/usr/lib/build/myimage-metadata.spec'
         ]
     )
     mock_template.assert_called_once_with(
@@ -226,8 +213,11 @@ def test_main(
     ]
 
 
+@patch('containermetadataRPM.kiwi_post_run.os')
 @patch('kiwi.system.result.Result.load')
-def test_main_no_docker_image(mock_load):
+def test_main_no_docker_image(mock_load, mock_os):
+    mock_os.environ = {'BUILD_DIST': 'build.dist'}
+    mock_os.path.exists.return_value = True
     mock_result = Mock()
     mock_load.return_value = mock_result
     mock_result.xml_state.build_type.get_image.return_value = 'oci'

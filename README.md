@@ -1,7 +1,6 @@
 # containermetadata-rpm
 
 [![Build Status](https://travis-ci.org/kubic-project/containermetadata-rpm.svg?branch=master)](https://travis-ci.org/kubic-project/containermetadata-rpm)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b214e04943c949a2af0f129210dc7994)](https://www.codacy.com/app/davidcassany/containermetadata-rpm?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kubic-project/containermetadata-rpm&amp;utm_campaign=Badge_Grade)
 
 This is KIWI hook for OBS that creates a metadata package for container images.
 This the created RPM only contains a single plain text file with file with all
