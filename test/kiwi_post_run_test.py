@@ -192,7 +192,7 @@ def test_main(
     mock_command.assert_called_once_with(
         [
             'rpmbuild', '--target', 'x86_64', '-ba', '--define',
-            '"disturl obs://someurl"', '/usr/lib/build/myimage-metadata.spec'
+            'disturl obs://someurl', '/usr/lib/build/myimage-metadata.spec'
         ]
     )
     mock_template.assert_called_once_with(

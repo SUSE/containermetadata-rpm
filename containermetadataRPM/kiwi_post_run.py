@@ -90,7 +90,7 @@ def main():
 
     rpmbuild = ['rpmbuild', '--target', image['arch'], '-ba']
     if 'disturl' in image:
-        rpmbuild.extend(['--define', '"disturl {0}"'.format(image['disturl'])])
+        rpmbuild.extend(['--define', 'disturl {0}'.format(image['disturl'])])
     rpmbuild.append('{0}/{1}-metadata.spec'.format(
         image['build_dir'], image['name']
     ))
